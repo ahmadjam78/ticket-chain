@@ -1,15 +1,15 @@
 <?php
 
-namespace Database\Factories;  // ← تغییر namespace
+namespace Database\Factories;
 
-use App\Domains\User\Models\User;  // ← مسیر درست مدل
+use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserFactory extends Factory
 {
-    protected $model = User::class;  // ← اضافه کنید (اختیاری ولی بهتر است)
+    protected $model = User::class;
 
     public function definition(): array
     {
