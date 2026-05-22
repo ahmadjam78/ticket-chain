@@ -22,19 +22,19 @@ class TicketStateTransitionTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Helper: ایجاد تیکت با وضعیت مشخص
+     * Helper: Create a ticket with a specific state.
      */
     private function createTicketWithState(string $stateClass): Ticket
     {
-        // ساخت دستی کاربر (بدون فکتوری)
+        // Manually create user (without factory)
         $user = new User();
         $user->name = 'Test User';
         $user->email = 'test_' . uniqid() . '@example.com';
         $user->password = bcrypt('password');
         $user->save();
 
-        // اختصاص نقش (در صورت نیاز - چون فیلد role در جدول نیست و از Spatie Roles استفاده می‌شود)
-        // ممکن است نیازی نباشد چون تست فقط وضعیت تیکت را بررسی می‌کند
+        // Assign role if needed (since role field is not in the table and Spatie Roles is used)
+        // May not be needed because the test only checks ticket state
 
         $ticket = new Ticket([
             'user_id' => $user->id,
@@ -52,11 +52,11 @@ class TicketStateTransitionTest extends TestCase
     {
         $ticket = $this->createTicketWithState(PendingLevel1::class);
 
-        // انتقال به PendingLevel2 باید مجاز باشد
+        // Transition to PendingLevel2 should be allowed
         $ticket->status->transitionTo(PendingLevel2::class);
         $this->assertInstanceOf(PendingLevel2::class, $ticket->fresh()->status);
 
-        // بازگشت به PendingLevel1 برای تست رد شدن
+        // Revert to PendingLevel1 to test rejection
         $ticket = $this->createTicketWithState(PendingLevel1::class);
         $ticket->status->transitionTo(Rejected::class);
         $this->assertInstanceOf(Rejected::class, $ticket->fresh()->status);
@@ -65,17 +65,17 @@ class TicketStateTransitionTest extends TestCase
     #[Test]
     public function it_allows_valid_transitions_from_pending_level2()
     {
-        // انتقال به Approved
+        // Transition to Approved
         $ticket = $this->createTicketWithState(PendingLevel2::class);
         $ticket->status->transitionTo(Approved::class);
         $this->assertInstanceOf(Approved::class, $ticket->fresh()->status);
 
-        // انتقال به Rejected
+        // Transition to Rejected
         $ticket = $this->createTicketWithState(PendingLevel2::class);
         $ticket->status->transitionTo(Rejected::class);
         $this->assertInstanceOf(Rejected::class, $ticket->fresh()->status);
 
-        // انتقال به Failed
+        // Transition to Failed
         $ticket = $this->createTicketWithState(PendingLevel2::class);
         $ticket->status->transitionTo(Failed::class);
         $this->assertInstanceOf(Failed::class, $ticket->fresh()->status);
@@ -98,11 +98,11 @@ class TicketStateTransitionTest extends TestCase
     {
         $ticket = $this->createTicketWithState(Failed::class);
 
-        // انتقال Failed -> Failed
+        // Transition Failed -> Failed
         $ticket->status->transitionTo(Failed::class);
         $this->assertInstanceOf(Failed::class, $ticket->fresh()->status);
 
-        // انتقال Failed -> Approved
+        // Transition Failed -> Approved
         $ticket->status->transitionTo(Approved::class);
         $this->assertInstanceOf(Approved::class, $ticket->fresh()->status);
     }
